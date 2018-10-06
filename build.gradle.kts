@@ -8,7 +8,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -22,8 +21,10 @@ configure<JavaPluginConvention> {
 }
 
 generateGrammarSource.apply {
-    outputDirectory = file("${project.projectDir}/src/main/java/antlr/")
-    arguments.addAll(listOf("-Dlanguage=Java", "-visitor", "-package", "antlr"))
+    outputDirectory = file("${project.projectDir}/src/main/antlr/generated")
+    arguments.addAll(listOf(
+            "-lib", "${project.projectDir}/src/main/antlr",
+            "-Dlanguage=Java", "-visitor", "-package", "generated", "${project.projectDir}/src/main/antlr/MyLang.g4"))
 }
 
 tasks.withType<JavaCompile> {
