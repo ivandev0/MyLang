@@ -1,29 +1,17 @@
-int main(){
-    //int i = 0;
-    //int k, m = 9;
-    //int j = 5 - (0);
-
-    //int i = 1;
-    //print i;
-
-    /*print 1 > 2 ;
-
-    print (1 + 2) * 3;
-
-    print "x";
-    print 11, 20;
-    print "x": 1, "x": 2;
-
-    print "x", "y" : 10;*/
-
-    int j = 0;
-    output(1);
-    j = 3;
-    print j;
-
+int main()
+{
+    print output(output2(output3(1)));
+    return 1;
 }
-
-int output(int i){
-    print i;
-    print j;
+int output(int i)
+{
+    return i + 1;
+}
+int output2(int i)
+{
+    return i + 1;
+}
+int output3(int i)
+{
+    return i;
 }

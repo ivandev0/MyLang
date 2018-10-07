@@ -1,5 +1,6 @@
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import response.MyLangException;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -23,6 +24,12 @@ public class Main {
         MyLangParser parser = new MyLangParser(tokens);
 
         MyLangInterpreter interpreter = new MyLangInterpreter();
-        interpreter.visitCompilationUnit(parser.compilationUnit());
+        try {
+            interpreter.visitCompilationUnit(parser.compilationUnit());
+        } catch (MyLangException e){
+            e.printStackTrace();
+            System.exit(1);
+        }
+
     }
 }

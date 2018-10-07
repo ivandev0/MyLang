@@ -9,7 +9,7 @@ compilationUnit
     ;
 
 funDeclaration
-    : result ID '(' funCallArgs* ')' block
+    : result ID '(' funCallArgs? ')' block
     ;
 
 result
@@ -53,7 +53,7 @@ statement
 	| ifThenStatement
 	| ifThenElseStatement
 	| forStatement
-	| funInvocation
+	| funInvocation ';'
 	| returnStatement
 	;
 
@@ -82,7 +82,7 @@ statementExpressionList
     ;
 
 funInvocation
-    : ID '(' argumentList? ')' ';'
+    : ID '(' argumentList? ')'
     ;
 
 argumentList
@@ -162,7 +162,7 @@ ID
     ;
 
 NUMBER
-    : [0-9]+
+    : [+-]?[0-9]+
     ;
 
 STRING

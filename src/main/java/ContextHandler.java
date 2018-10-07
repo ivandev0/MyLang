@@ -1,4 +1,6 @@
 import org.antlr.v4.runtime.ParserRuleContext;
+import response.EmptyResponse;
+import response.MyLangException;
 import response.Response;
 
 import java.lang.reflect.InvocationTargetException;
@@ -7,14 +9,14 @@ import java.util.NoSuchElementException;
 
 public interface ContextHandler<T extends ParserRuleContext>{
 
-    Response handler(T ctx);
+    Response handler(T ctx) throws MyLangException;
 
-    default Response defaultHandler(T ctx){
+    default Response defaultHandler(T ctx)  throws MyLangException{
         return defaultHandler(ctx, 0);
     }
 
     //TODO объснить почему static
-    default Response defaultHandler(T ctx, int child){
+    default Response defaultHandler(T ctx, int child) throws MyLangException {
         String className = ctx.getChild(child).getClass().getSimpleName();
         try {
             Class<?> clazz = Class.forName(className);
@@ -25,19 +27,24 @@ public interface ContextHandler<T extends ParserRuleContext>{
         } catch (ClassNotFoundException e) {
             System.err.println("ERROR block statement unknown");
             System.exit(1);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | ClassCastException e) {
+        } catch (NoSuchMethodException e) {
             //так как класс реализует интерфейс то ошибка не возможна
-            //illegal access недостаточно прав
             //TODO specify errors
             e.printStackTrace();
-        } catch (NoSuchElementException e){
-            //TODO specify element
-            System.err.println("ERROR no such element");
-            System.exit(1);
+        } catch (IllegalAccessException e) {
+            //TODO specify errors
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            //e.printStackTrace();
+            throw new MyLangException(e.getTargetException().getMessage());
+        } catch (InstantiationException e) {
+            //TODO specify errors
+            e.printStackTrace();
+        } catch (ClassCastException e) {
+            //TODO specify errors
             e.printStackTrace();
         }
 
-        //TODO without return
-        return null;
+        return new EmptyResponse();
     }
 }

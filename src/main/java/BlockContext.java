@@ -1,26 +1,15 @@
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
-import response.IntegerResponse;
-import response.Response;
-import response.ReturnResponse;
+import response.*;
 
-import java.beans.Expression;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
+class BlockContext implements ContextHandler<MyLangParser.BlockContext>{
 
     static private LinkedList<Set<Variable>> localStorage = new LinkedList<>();
-    static private Queue<LinkedList<Set<Variable>>> stack = new LinkedList<>();
+    static private Deque<LinkedList<Set<Variable>>> stack = new LinkedList<>();
 
-    private static boolean contains(String name){
-        return localStorage
-                .stream()
-                .flatMap(Collection::stream)
-                .anyMatch(var -> var.getName().equals(name));
-
-    }
-
-    static Variable get(String name){
+    static Variable get(String name) throws MyLangException{
         Variable var = localStorage
                 .stream()
                 .flatMap(Collection::stream)
@@ -28,20 +17,18 @@ class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
                 .findFirst()
                 .orElse(null);
         if(var == null){
-            System.err.println("Нет такой переменной " + name);
-            System.exit(1);
+            throw new MyLangException("Переменная " + name + " не объявлена");
         }
         return var;
     }
 
-    static <T> void add(String name, T value){
+    static <T> void add(String name, T value) throws MyLangException{
         if(!localStorage.getLast().add(new Variable<>(name, value))){
-            System.err.println("Такая переменная уже существует " + name);
-            System.exit(1);
+            throw new MyLangException("Переменная " + name + " уже существует");
         }
     }
 
-    static <T> void update(String name, T newValue){
+    static <T> void update(String name, T newValue) throws MyLangException{
         Variable var = localStorage
                 .stream()
                 .flatMap(Collection::stream)
@@ -50,8 +37,7 @@ class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
                 .orElse(null);
 
         if(var == null){
-            System.err.println("Нет такой переменной " + name);
-            System.exit(1);
+            throw new MyLangException("Переменная " + name + " не объявлена");
         }
         var.updateValue(newValue);
     }
@@ -65,7 +51,7 @@ class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
     }
 
     static void pushStack(){
-        stack.add(new LinkedList<Set<Variable>>(localStorage));
+        stack.addFirst(new LinkedList<Set<Variable>>(localStorage));
         localStorage.clear();
         createNestedStorage();
     }
@@ -75,15 +61,15 @@ class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
         localStorage = stack.poll();
     }
 
-    static void associateNamesWithValues(LinkedList<FunArgs> names, List<MyLangParser.ExpressionContext> values){
+    static void associateNamesWithValues(LinkedList<FunArgs> names, List<MyLangParser.ExpressionContext> values) throws MyLangException{
         for (int i = 0; i < values.size(); i++){
-            add(names.get(i).name, (Integer) new ExpressionContext().handler(values.get(i)).getResponse());
+            add(names.get(i).name, new ExpressionContext().handler(values.get(i)).getResponse());
         }
     }
 
     @Override
-    public Response handler(MyLangParser.BlockContext ctx) {
-        Response response = null;
+    public Response handler(MyLangParser.BlockContext ctx) throws MyLangException {
+        Response response = new EmptyResponse();
         if(ctx.blockStatements() != null){
             createNestedStorage();
             for (MyLangParser.BlockStatementsContext blockStatement : ctx.blockStatements()) {
@@ -102,7 +88,7 @@ class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
 class BlockStatementsContext implements ContextHandler<MyLangParser.BlockStatementsContext> {
 
     @Override
-    public Response handler(MyLangParser.BlockStatementsContext ctx) {
+    public Response handler(MyLangParser.BlockStatementsContext ctx) throws MyLangException {
         return defaultHandler(ctx);
     }
 
@@ -111,12 +97,10 @@ class BlockStatementsContext implements ContextHandler<MyLangParser.BlockStateme
 class LocalVariableDeclarationStatementContext implements ContextHandler<MyLangParser.LocalVariableDeclarationStatementContext> {
 
     @Override
-    public Response handler(MyLangParser.LocalVariableDeclarationStatementContext ctx) {
-        //System.out.println("i'm in 1");
+    public Response handler(MyLangParser.LocalVariableDeclarationStatementContext ctx) throws MyLangException{
         String type = ctx.types().getText();
         if(!type.equals("int")){
-            System.err.println("Нереалиованный тип данных " + type);
-            System.exit(1);
+            throw new MyLangException("Нереализованный тип данных " + type);
         }
         for(int i = 0; i < ctx.variableDeclaratorList().getChildCount(); i++){
             if(ctx.variableDeclaratorList().getChild(i) instanceof TerminalNodeImpl){
@@ -125,105 +109,101 @@ class LocalVariableDeclarationStatementContext implements ContextHandler<MyLangP
 
             MyLangParser.VariableDeclaratorContext vdCtx = (MyLangParser.VariableDeclaratorContext) ctx.variableDeclaratorList().getChild(i);
             if(vdCtx.getChildCount() == 1){
-                BlockFactory.add(vdCtx.getText(), 0);
+                BlockContext.add(vdCtx.getText(), 0);
             } else {
                 //count additive expression
                 Response<Integer> response = new AdditiveExpressionContext().handler(vdCtx.additiveExpression());
-                BlockFactory.add(vdCtx.getChild(0).getText(), response.getResponse());
+                BlockContext.add(vdCtx.getChild(0).getText(), response.getResponse());
             }
         }
 
-        //TODO
-        return null;
-
+        return new EmptyResponse();
     }
 }
 
 class PrintContext implements ContextHandler<MyLangParser.PrintContext> {
 
     @Override
-    public Response handler(MyLangParser.PrintContext ctx) {
-        defaultHandler(ctx, 1);
-        return null;
+    public Response handler(MyLangParser.PrintContext ctx) throws MyLangException {
+        return defaultHandler(ctx, 1);
     }
 }
 
 class PrintVariationsContext implements ContextHandler<MyLangParser.PrintVariationsContext> {
     @Override
-    public Response handler(MyLangParser.PrintVariationsContext ctx) {
+    public Response handler(MyLangParser.PrintVariationsContext ctx) throws MyLangException{
         if(ctx.getChildCount() >= 3 && ctx.start.getType() == MyLangLexer.STRING && ctx.COLON() != null){
-            //System.out.println("3");
             Response response = new ExpressionContext().handler(ctx.expression());
-            System.out.println(ctx.start.getText() + " " + response.getResponse());
+            System.out.print(ctx.start.getText().replace("\"", "") + " " + response.getResponse());
         } else if ( ctx.start.getType() == MyLangLexer.STRING){
-            //System.out.println("1");
-            System.out.println(ctx.start.getText());
+            System.out.print(ctx.start.getText().replace("\"", ""));
         } else if (ctx.expression() != null){
-            //System.out.println("2");
             Response response = new ExpressionContext().handler(ctx.expression());
-            System.out.println(response.getResponse());
+            System.out.print(response.getResponse());
         } else {
-            //TODO undefined
+            throw new MyLangException(ctx.getText() + "\nНереализованная форма оператора print");
+        }
+
+        if(ctx.printVariations().size() != 0){
+            System.out.print(" ");
+        } else {
+            System.out.println("");
         }
 
         for(MyLangParser.PrintVariationsContext context: ctx.printVariations()){
             handler(context);
         }
 
-        return null;
+        return new EmptyResponse();
     }
 }
 
 class StatementContext implements ContextHandler<MyLangParser.StatementContext> {
 
     @Override
-    public Response handler(MyLangParser.StatementContext ctx) {
-        //System.out.println("i'm in 3");
-
-        if(ctx.block() != null){
-            new BlockFactory().handler(ctx.block());
-        }
-
+    public Response handler(MyLangParser.StatementContext ctx) throws MyLangException {
+        /*if(ctx.block() != null){
+            return new BlockContext().handler(ctx.block());
+        }*/
         return defaultHandler(ctx);
-
     }
 }
 
 class AssignmentContext implements ContextHandler<MyLangParser.AssignmentContext>{
     @Override
-    public Response handler(MyLangParser.AssignmentContext ctx) {
+    public Response handler(MyLangParser.AssignmentContext ctx) throws MyLangException{
         String name = ctx.ID().getText();
-        Integer num = (Integer) BlockFactory.get(name).getValue();
+        Integer num = (Integer) BlockContext.get(name).getValue();
         IntegerResponse response = new AdditiveExpressionContext().handler(ctx.additiveExpression());
         switch (ctx.assignmentOperator().start.getType()) {
             case MyLangLexer.ASSIGN:
-                BlockFactory.update(name, response.getResponse());
+                BlockContext.update(name, response.getResponse());
                 break;
             case MyLangLexer.ADD_ASSIGN:
-                BlockFactory.update(name, response.getResponse() + num);
+                BlockContext.update(name, response.getResponse() + num);
                 break;
             case MyLangLexer.SUB_ASSIGN:
-                BlockFactory.update(name,response.getResponse() - num);
+                BlockContext.update(name,response.getResponse() - num);
                 break;
             case MyLangLexer.MUL_ASSIGN:
-                BlockFactory.update(name,response.getResponse() * num);
+                BlockContext.update(name,response.getResponse() * num);
                 break;
             case MyLangLexer.DIV_ASSIGN:
                 if(num == 0){
-                    System.err.println("Деление на 0");
-                    System.exit(1);
+                    throw new MyLangException("Деление на 0");
                 }
-                BlockFactory.update(name,response.getResponse() / num);
+                BlockContext.update(name,response.getResponse() / num);
                 break;
+            default:
+                throw new MyLangException("Операция " + ctx.assignmentOperator().start.getText() + " не поддерживается");
         }
-
-        return null;
+        return new EmptyResponse();
     }
 }
 
 class FunInvocationContext implements ContextHandler<MyLangParser.FunInvocationContext>{
     @Override
-    public Response handler(MyLangParser.FunInvocationContext ctx) {
+    public Response handler(MyLangParser.FunInvocationContext ctx) throws MyLangException{
         String name = ctx.ID().getText();
         Function function = MyLangInterpreter.functions
                 .stream()
@@ -231,41 +211,42 @@ class FunInvocationContext implements ContextHandler<MyLangParser.FunInvocationC
                 .findFirst()
                 .orElse(null);
         if(function == null){
-            System.err.println("Функция " + name + " не объявлена");
-            System.exit(1);
+            throw new MyLangException("Функция " + name + " не объявлена");
         }
 
+        if (function.name.equals("main")){
+            throw new MyLangException("Нельзя вызывать рекурсивно функцию main");
+        }
 
-        List<MyLangParser.ExpressionContext> funArgs = ctx.argumentList().expression();
+        List<MyLangParser.ExpressionContext> funArgs = ctx.argumentList() == null ? new LinkedList<>() : ctx.argumentList().expression();
         if(function.args.size() != funArgs.size()){
-            //TODO ожидалось/получили
-            System.err.println("Неверное количество параметров для функции " + name);
-            System.exit(1);
+            throw new MyLangException("Неверное количество параметров для функции " + name
+                    + "\nОжидалось " + function.args.size() + " аргументов");
         }
 
-        BlockFactory.pushStack();
-        BlockFactory.associateNamesWithValues(function.args, funArgs);
+        BlockContext.pushStack();
+        BlockContext.associateNamesWithValues(function.args, funArgs);
         MyLangParser.FunDeclarationContext fdc = function.ctx;
-        Response response = new BlockFactory().handler(fdc.block());
-        if(response == null && !function.resultType.equals("void")){
-            System.err.println("Функция " + name + " должна возвращать значение типа " + function.resultType);
-            System.exit(1);
+        Response response = new BlockContext().handler(fdc.block());
+        if(response.getResponse() == null && !function.resultType.equals("void")){
+            throw new MyLangException("Функция " + name + " должна возвращать значение типа " + function.resultType);
         }
-        if(response != null && ((response.getResponse().equals("") && !function.resultType.equals("void")) ||
+        if(response.getResponse() != null && ((response.getResponse().equals("") && !function.resultType.equals("void")) ||
                                 (!response.getResponse().equals("") && function.resultType.equals("void")))){
-            System.err.println("Функция " + name + " должна возвращать тип " + function.resultType);
-            System.exit(1);
+            throw new MyLangException("Функция " + name + " должна возвращать значение типа " + function.resultType);
         }
-        BlockFactory.popStack();
+        BlockContext.popStack();
 
-
-        return null;
+        if (!(response instanceof EmptyResponse) && response.getResponse().equals("")){
+            return new EmptyResponse();
+        }
+        return response;
     }
 }
 
 class ReturnStatementContext implements ContextHandler<MyLangParser.ReturnStatementContext>{
     @Override
-    public Response handler(MyLangParser.ReturnStatementContext ctx) {
+    public Response handler(MyLangParser.ReturnStatementContext ctx) throws MyLangException {
         if(ctx.expression() != null){
             Response response = new ExpressionContext().handler(ctx.expression());
             return new ReturnResponse(String.valueOf(response.getResponse()));

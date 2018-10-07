@@ -1,14 +1,14 @@
+import response.MyLangException;
 import response.Response;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
-public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
+class MyLangInterpreter {
 
     static LinkedList<Function> functions;
 
-    @Override
-    public Void visitCompilationUnit(MyLangParser.CompilationUnitContext ctx) {
+    void visitCompilationUnit(MyLangParser.CompilationUnitContext ctx) throws MyLangException {
         FunctionVisitor functionVisitor = new FunctionVisitor();
         functions = ctx.funDeclaration()
                 .stream()
@@ -20,17 +20,10 @@ public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
         }
 
         if (!functions.getFirst().name.equals("main") || functions.getFirst().args.size() != 0 || !functions.getFirst().resultType.equals("int")){
-            System.err.println("Первая функция должна быть main без аргументов, возвращающая int");
-            System.exit(1);
+            throw new MyLangException("Первая функция должна быть main без аргументов, возвращающая int");
         }
 
-        /*for(Function fun: functions){
-            System.out.println(fun);
-        }*/
-
         new FunBodyVisitor().visitBlock(functions.getFirst().ctx.block());
-
-        return null;
     }
 
     class FunctionVisitor extends MyLangBaseVisitor<Function>{
@@ -40,10 +33,13 @@ public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
             String name = ctx.getChild(1).getText();
 
             FunArgsVisitor funArgsVisitor = new FunArgsVisitor();
-            LinkedList<FunArgs> funArgs = ctx.funCallArgs()
-                    .stream()
-                    .map(args -> args.accept(funArgsVisitor))
-                    .collect(Collectors.toCollection(LinkedList::new));
+            LinkedList<FunArgs> funArgs = new LinkedList<>();
+            if(ctx.funCallArgs() != null) {
+                funArgs = ctx.funCallArgs().funArgs()
+                        .stream()
+                        .map(args -> args.accept(funArgsVisitor))
+                        .collect(Collectors.toCollection(LinkedList::new));
+            }
 
             return new Function(name, resultType, funArgs, ctx);
         }
@@ -51,24 +47,23 @@ public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
 
     private class FunArgsVisitor extends MyLangBaseVisitor<FunArgs>{
         @Override
-        public FunArgs visitFunCallArgs(MyLangParser.FunCallArgsContext ctx) {
-            if(ctx.getChildCount() == 0){
+        public FunArgs visitFunArgs(MyLangParser.FunArgsContext ctx) {
+            /*if(ctx.getChildCount() == 0){
                 return null;
-            }
-            return new FunArgs(ctx.getChild(0).getChild(0).getText(), ctx.getChild(0).getChild(1).getText());
+            }*/
+            return new FunArgs(ctx.types().getText(), ctx.ID().getText());
         }
+
+
     }
 
-    private class FunBodyVisitor extends MyLangBaseVisitor<Void>{
+    private class FunBodyVisitor{
 
-        @Override
-        public Void visitBlock(MyLangParser.BlockContext ctx) {
-            Response response = new BlockFactory().handler(ctx);
-            if(response == null || response.getResponse().equals("")){
-                System.err.println("Функция main должна возвращать тип int");
-                System.exit(1);
+        void visitBlock(MyLangParser.BlockContext ctx) throws MyLangException{
+            Response response = new BlockContext().handler(ctx);
+            if(response.getResponse() == null || response.getResponse().equals("")){
+                throw new MyLangException("Функция main должна возвращать тип int");
             }
-            return null;
         }
 
     }
