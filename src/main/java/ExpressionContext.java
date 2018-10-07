@@ -104,6 +104,20 @@ class AdditiveExpressionContext implements ContextHandler<MyLangParser.AdditiveE
 
         if(ctx.funInvocation() != null){
             //TODO fun invocation
+            String name = ctx.funInvocation().ID().getText();
+            Function function = MyLangInterpreter.functions
+                    .stream()
+                    .filter(fun -> fun.name.equals(name))
+                    .findFirst()
+                    .orElse(null);
+            if(function == null){
+                System.err.println("Функция " + name + " не объявлена");
+                System.exit(1);
+            }
+            if(function.resultType.equals("void")){
+                System.err.println("Функция " + name + " не возвращает результата");
+                System.exit(1);
+            }
         }
 
         if (ctx.LPAREN() != null && ctx.RPAREN() != null) {

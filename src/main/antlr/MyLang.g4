@@ -54,6 +54,7 @@ statement
 	| ifThenElseStatement
 	| forStatement
 	| funInvocation
+	| returnStatement
 	;
 
 ifThenStatement
@@ -96,6 +97,10 @@ printVariations
     : STRING (',' printVariations)*
     | expression (',' printVariations)*
     | STRING COLON expression (',' printVariations)*
+    ;
+
+returnStatement
+    : 'return' expression? ';'
     ;
 
 //EXPRESSION

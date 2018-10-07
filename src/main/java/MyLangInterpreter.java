@@ -1,3 +1,5 @@
+import response.Response;
+
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
@@ -61,7 +63,11 @@ public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
 
         @Override
         public Void visitBlock(MyLangParser.BlockContext ctx) {
-            new BlockFactory().handler(ctx);
+            Response response = new BlockFactory().handler(ctx);
+            if(response == null || response.getResponse().equals("")){
+                System.err.println("Функция main должна возвращать тип int");
+                System.exit(1);
+            }
             return null;
         }
 

@@ -1,6 +1,7 @@
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import response.IntegerResponse;
 import response.Response;
+import response.ReturnResponse;
 
 import java.beans.Expression;
 import java.util.*;
@@ -64,14 +65,14 @@ class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
     }
 
     static void pushStack(){
-        stack.add(localStorage);
+        stack.add(new LinkedList<Set<Variable>>(localStorage));
         localStorage.clear();
         createNestedStorage();
     }
 
     static void popStack(){
-        localStorage = stack.poll();
         deleteNestedStorage();
+        localStorage = stack.poll();
     }
 
     static void associateNamesWithValues(LinkedList<FunArgs> names, List<MyLangParser.ExpressionContext> values){
@@ -82,15 +83,19 @@ class BlockFactory implements ContextHandler<MyLangParser.BlockContext>{
 
     @Override
     public Response handler(MyLangParser.BlockContext ctx) {
+        Response response = null;
         if(ctx.blockStatements() != null){
             createNestedStorage();
             for (MyLangParser.BlockStatementsContext blockStatement : ctx.blockStatements()) {
-                new BlockStatementsContext().handler(blockStatement);
+                response = new BlockStatementsContext().handler(blockStatement);
+                if(response instanceof ReturnResponse){
+                    break;
+                }
             }
             deleteNestedStorage();
         }
 
-        return null;
+        return response;
     }
 }
 
@@ -98,8 +103,7 @@ class BlockStatementsContext implements ContextHandler<MyLangParser.BlockStateme
 
     @Override
     public Response handler(MyLangParser.BlockStatementsContext ctx) {
-        defaultHandler(ctx);
-        return null;
+        return defaultHandler(ctx);
     }
 
 }
@@ -180,9 +184,8 @@ class StatementContext implements ContextHandler<MyLangParser.StatementContext> 
             new BlockFactory().handler(ctx.block());
         }
 
-        defaultHandler(ctx);
+        return defaultHandler(ctx);
 
-        return null;
     }
 }
 
@@ -243,10 +246,30 @@ class FunInvocationContext implements ContextHandler<MyLangParser.FunInvocationC
         BlockFactory.pushStack();
         BlockFactory.associateNamesWithValues(function.args, funArgs);
         MyLangParser.FunDeclarationContext fdc = function.ctx;
-        new BlockFactory().handler(fdc.block());
+        Response response = new BlockFactory().handler(fdc.block());
+        if(response == null && !function.resultType.equals("void")){
+            System.err.println("Функция " + name + " должна возвращать значение типа " + function.resultType);
+            System.exit(1);
+        }
+        if(response != null && ((response.getResponse().equals("") && !function.resultType.equals("void")) ||
+                                (!response.getResponse().equals("") && function.resultType.equals("void")))){
+            System.err.println("Функция " + name + " должна возвращать тип " + function.resultType);
+            System.exit(1);
+        }
         BlockFactory.popStack();
 
 
         return null;
+    }
+}
+
+class ReturnStatementContext implements ContextHandler<MyLangParser.ReturnStatementContext>{
+    @Override
+    public Response handler(MyLangParser.ReturnStatementContext ctx) {
+        if(ctx.expression() != null){
+            Response response = new ExpressionContext().handler(ctx.expression());
+            return new ReturnResponse(String.valueOf(response.getResponse()));
+        }
+        return new ReturnResponse("");
     }
 }
