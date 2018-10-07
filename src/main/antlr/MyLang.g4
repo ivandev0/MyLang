@@ -57,11 +57,11 @@ statement
 	;
 
 ifThenStatement
-    : 'if' '(' expression+ ')' statement
+    : 'if' '(' expression ')' statement
     ;
 
 ifThenElseStatement
-    : 'if' '(' expression+ ')' statement 'else' statement
+    : 'if' '(' expression ')' statement 'else' statement
     ;
 
 forStatement
@@ -106,15 +106,15 @@ expression
 	;
 
 assignment
-	:	ID assignmentOperator additiveExpression
+	:	ID assignmentOperator additiveExpression ';'
 	;
 
 assignmentOperator
-	:	'='
-	|	'*='
-	|	'/='
-	|	'+='
-	|	'-='
+	:	ASSIGN
+	|	MUL_ASSIGN
+	|	DIV_ASSIGN
+	|	ADD_ASSIGN
+	|	SUB_ASSIGN
 	;
 
 conditionalOrExpression

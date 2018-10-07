@@ -27,6 +27,7 @@ public interface ContextHandler<T extends ParserRuleContext>{
             System.exit(1);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | ClassCastException e) {
             //так как класс реализует интерфейс то ошибка не возможна
+            //illegal access недостаточно прав
             //TODO specify errors
             e.printStackTrace();
         } catch (NoSuchElementException e){

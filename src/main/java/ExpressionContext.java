@@ -1,4 +1,3 @@
-import generated.*;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import response.*;
 
@@ -99,7 +98,7 @@ class AdditiveExpressionContext implements ContextHandler<MyLangParser.AdditiveE
         }
 
         if(ctx.ID() != null){
-            int result = BlockStatementsFactory.get(ctx.ID().getText()).value;
+            int result = (Integer) BlockFactory.get(ctx.ID().getText()).getValue();
             return new IntegerResponse(result);
         }
 
@@ -128,4 +127,3 @@ class AdditiveExpressionContext implements ContextHandler<MyLangParser.AdditiveE
         return null;
     }
 }
-

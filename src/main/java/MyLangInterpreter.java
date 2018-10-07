@@ -1,17 +1,21 @@
-import generated.*;
-
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
 
+    static LinkedList<Function> functions;
+
     @Override
     public Void visitCompilationUnit(MyLangParser.CompilationUnitContext ctx) {
         FunctionVisitor functionVisitor = new FunctionVisitor();
-        LinkedList<Function> functions = ctx.funDeclaration()
+        functions = ctx.funDeclaration()
                 .stream()
                 .map(function -> function.accept(functionVisitor))
                 .collect(Collectors.toCollection(LinkedList::new));
+
+        if(functions.size() == 0){
+            System.exit(0);
+        }
 
         if (!functions.getFirst().name.equals("main") || functions.getFirst().args.size() != 0 || !functions.getFirst().resultType.equals("int")){
             System.err.println("Первая функция должна быть main без аргументов, возвращающая int");
@@ -22,15 +26,12 @@ public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
             System.out.println(fun);
         }*/
 
-        FunBodyVisitor funBodyVisitor = new FunBodyVisitor();
-        for (MyLangParser.BlockStatementsContext blockStatement : functions.getFirst().ctx.block().blockStatements()) {
-            funBodyVisitor.visitBlockStatements(blockStatement);
-        }
+        new FunBodyVisitor().visitBlock(functions.getFirst().ctx.block());
 
         return null;
     }
 
-    private class FunctionVisitor extends MyLangBaseVisitor<Function>{
+    class FunctionVisitor extends MyLangBaseVisitor<Function>{
         @Override
         public Function visitFunDeclaration(MyLangParser.FunDeclarationContext ctx) {
             String resultType = ctx.getChild(0).getText();
@@ -50,18 +51,20 @@ public class MyLangInterpreter extends MyLangBaseVisitor<Void> {
         @Override
         public FunArgs visitFunCallArgs(MyLangParser.FunCallArgsContext ctx) {
             if(ctx.getChildCount() == 0){
-                return new FunArgs("", "");
+                return null;
             }
             return new FunArgs(ctx.getChild(0).getChild(0).getText(), ctx.getChild(0).getChild(1).getText());
         }
     }
 
     private class FunBodyVisitor extends MyLangBaseVisitor<Void>{
+
         @Override
-        public Void visitBlockStatements(generated.MyLangParser.BlockStatementsContext ctx) {
-            new BlockStatementsFactory().handler(ctx);
+        public Void visitBlock(MyLangParser.BlockContext ctx) {
+            new BlockFactory().handler(ctx);
             return null;
         }
+
     }
 }
 
@@ -69,8 +72,6 @@ class Function {
     final String name, resultType;
     final LinkedList<FunArgs> args;
     final MyLangParser.FunDeclarationContext ctx;
-
-    LinkedList<Variable> localStorage;
 
     Function(String name, String resultType, LinkedList<FunArgs> args, MyLangParser.FunDeclarationContext ctx) {
         this.name = name;
@@ -106,25 +107,28 @@ class FunArgs{
     }
 }
 
-class Variable {
-    private final String name, type;
-    int value;
+class Variable<T> {
+    private final String name;
+    private T value;
 
-    public Variable(String name, String type, int value) {
+    Variable(String name, T value) {
         this.name = name;
-        this.type = type;
         this.value = value;
     }
 
-    public String getName() {
+    String getName() {
         return name;
+    }
+
+    T getValue() {
+        return value;
     }
 
     public void validate(){
 
     }
 
-    public void updateValue(int newValue){
+    void updateValue(T newValue){
         value = newValue;
     }
 
@@ -146,9 +150,9 @@ class Variable {
     public String toString() {
         return "Variable{" +
                 "name='" + name + '\'' +
-                ", type='" + type + '\'' +
                 ", value='" + value + '\'' +
                 '}';
     }
+
 }
 

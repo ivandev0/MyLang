@@ -21,10 +21,7 @@ configure<JavaPluginConvention> {
 }
 
 generateGrammarSource.apply {
-    outputDirectory = file("${project.projectDir}/src/main/antlr/generated")
-    arguments.addAll(listOf(
-            "-lib", "${project.projectDir}/src/main/antlr",
-            "-Dlanguage=Java", "-visitor", "-package", "generated", "${project.projectDir}/src/main/antlr/MyLang.g4"))
+    arguments.addAll(listOf("-Dlanguage=Java", "-visitor" ,"${project.projectDir}/src/main/antlr/MyLang.g4"))
 }
 
 tasks.withType<JavaCompile> {
