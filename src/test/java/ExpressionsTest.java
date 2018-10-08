@@ -1,10 +1,13 @@
+import myLang.interpreter.MyLangInterpreter;
+import myLangParser.MyLangLexer;
+import myLangParser.MyLangParser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import response.MyLangException;
+import myLang.response.MyLangException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

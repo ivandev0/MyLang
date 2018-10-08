@@ -1,4 +1,4 @@
-package response;
+package myLang.response;
 
 public class BooleanResponse extends AbstractResponse<Boolean>{
     public BooleanResponse(Boolean response) {

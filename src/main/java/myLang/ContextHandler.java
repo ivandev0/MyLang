@@ -1,11 +1,13 @@
+package myLang;
+
+import myLang.Main;
 import org.antlr.v4.runtime.ParserRuleContext;
-import response.EmptyResponse;
-import response.MyLangException;
-import response.Response;
+import myLang.response.EmptyResponse;
+import myLang.response.MyLangException;
+import myLang.response.Response;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.NoSuchElementException;
 
 public interface ContextHandler<T extends ParserRuleContext>{
 
@@ -19,7 +21,8 @@ public interface ContextHandler<T extends ParserRuleContext>{
     default Response defaultHandler(T ctx, int child) throws MyLangException {
         String className = ctx.getChild(child).getClass().getSimpleName();
         try {
-            Class<?> clazz = Class.forName(className);
+            //Class<?> clazz = Main.class.getClassLoader().loadClass(className);
+            Class<?> clazz = new DynamicClassLoader().loadClass(className);
 
             Method method = clazz.getDeclaredMethod("handler", ctx.getChild(child).getClass());
             return (Response) method.invoke(clazz.newInstance(), ctx.getChild(child));

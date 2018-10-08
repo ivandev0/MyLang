@@ -1,4 +1,4 @@
-package response;
+package myLang.response;
 
 public class EmptyResponse extends AbstractResponse<Void> {
     public EmptyResponse() {

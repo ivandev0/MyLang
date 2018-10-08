@@ -1,4 +1,4 @@
-package response;
+package myLang.response;
 
 public class MyLangException extends Exception {
     public MyLangException(String message) {

@@ -1,4 +1,4 @@
-package response;
+package myLang.response;
 
 abstract class AbstractResponse<T> implements Response<T> {
     final T response;

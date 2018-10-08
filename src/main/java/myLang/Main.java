@@ -1,6 +1,11 @@
+package myLang;
+
+import myLang.interpreter.MyLangInterpreter;
+import myLangParser.MyLangLexer;
+import myLangParser.MyLangParser;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import response.MyLangException;
+import myLang.response.MyLangException;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

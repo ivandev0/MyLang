@@ -1,14 +1,19 @@
-import response.MyLangException;
-import response.Response;
+package myLang.interpreter;
+
+import myLang.block.BlockContext;
+import myLang.response.MyLangException;
+import myLang.response.Response;
+import myLangParser.MyLangBaseVisitor;
+import myLangParser.MyLangParser;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
-class MyLangInterpreter {
+public class MyLangInterpreter {
 
-    static LinkedList<Function> functions;
+    public static LinkedList<Function> functions;
 
-    void visitCompilationUnit(MyLangParser.CompilationUnitContext ctx) throws MyLangException {
+    public void visitCompilationUnit(MyLangParser.CompilationUnitContext ctx) throws MyLangException {
         FunctionVisitor functionVisitor = new FunctionVisitor();
         functions = ctx.funDeclaration()
                 .stream()
@@ -26,7 +31,7 @@ class MyLangInterpreter {
         new FunBodyVisitor().visitBlock(functions.getFirst().ctx.block());
     }
 
-    class FunctionVisitor extends MyLangBaseVisitor<Function>{
+    class FunctionVisitor extends MyLangBaseVisitor<Function> {
         @Override
         public Function visitFunDeclaration(MyLangParser.FunDeclarationContext ctx) {
             String resultType = ctx.getChild(0).getText();
@@ -45,7 +50,7 @@ class MyLangInterpreter {
         }
     }
 
-    private class FunArgsVisitor extends MyLangBaseVisitor<FunArgs>{
+    private class FunArgsVisitor extends MyLangBaseVisitor<FunArgs> {
         @Override
         public FunArgs visitFunArgs(MyLangParser.FunArgsContext ctx) {
             /*if(ctx.getChildCount() == 0){
@@ -67,93 +72,5 @@ class MyLangInterpreter {
         }
 
     }
-}
-
-class Function {
-    final String name, resultType;
-    final LinkedList<FunArgs> args;
-    final MyLangParser.FunDeclarationContext ctx;
-
-    Function(String name, String resultType, LinkedList<FunArgs> args, MyLangParser.FunDeclarationContext ctx) {
-        this.name = name;
-        this.resultType = resultType;
-        this.args = args;
-        this.ctx = ctx;
-    }
-
-    @Override
-    public String toString() {
-        return "Function{" +
-                "name='" + name + '\'' +
-                ", resultType='" + resultType + '\'' +
-                ", args=" + args +
-                '}';
-    }
-}
-
-class FunArgs{
-    final String type, name;
-
-    FunArgs(String type, String name) {
-        this.type = type;
-        this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return "FunArgs{" +
-                "type='" + type + '\'' +
-                ", name='" + name + '\'' +
-                '}';
-    }
-}
-
-class Variable<T> {
-    private final String name;
-    private T value;
-
-    Variable(String name, T value) {
-        this.name = name;
-        this.value = value;
-    }
-
-    String getName() {
-        return name;
-    }
-
-    T getValue() {
-        return value;
-    }
-
-    public void validate(){
-
-    }
-
-    void updateValue(T newValue){
-        value = newValue;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if(obj instanceof Variable){
-            Variable variable = (Variable) obj;
-            return name.equals(variable.name);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return name.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Variable{" +
-                "name='" + name + '\'' +
-                ", value='" + value + '\'' +
-                '}';
-    }
-
 }
 

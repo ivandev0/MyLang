@@ -1,4 +1,4 @@
-package response;
+package myLang.response;
 
 public class ReturnResponse extends AbstractResponse<String> {
     public ReturnResponse(String response) {

@@ -1,4 +1,4 @@
-package response;
+package myLang.response;
 
 public class IntegerResponse extends AbstractResponse<Integer>{
     public IntegerResponse(Integer response) {
