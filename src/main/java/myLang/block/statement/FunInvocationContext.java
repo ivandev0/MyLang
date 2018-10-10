@@ -35,8 +35,7 @@ public class FunInvocationContext implements ContextHandler<MyLangParser.FunInvo
                     + "\nОжидалось " + function.getArgs().size() + " аргументов");
         }
 
-        BlockContext.pushStack();
-        BlockContext.associateNamesWithValues(function.getArgs(), funArgs);
+        BlockContext.pushStack(function.getArgs(), funArgs);
         MyLangParser.FunDeclarationContext fdc = function.getCtx();
         Response response = new BlockContext().handler(fdc.block());
         if(response.getResponse() == null && !function.getResultType().equals("void")){

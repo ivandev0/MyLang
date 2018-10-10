@@ -1,44 +1,7 @@
-import myLang.interpreter.MyLangInterpreter;
-import myLangParser.MyLangLexer;
-import myLangParser.MyLangParser;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import static org.junit.Assert.*;
 import org.junit.Test;
-import myLang.response.MyLangException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-public class PrintTest {
-
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-
-    private void run(String input){
-        MyLangLexer lexer = new MyLangLexer(CharStreams.fromString(input));
-
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        MyLangParser parser = new MyLangParser(tokens);
-        try {
-            new MyLangInterpreter().visitCompilationUnit(parser.compilationUnit());
-        } catch (MyLangException e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
-    }
-
-    @Before
-    public void setUp() {
-        System.setOut(new PrintStream(outContent));
-    }
-
-    @After
-    public void tearDown() {
-        System.setOut(originalOut);
-    }
+public class PrintTest extends TestBase{
 
     @Test
     public void printNothing() {
@@ -47,7 +10,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("", outContent.toString());
+        assertEquals("", outContent.toString());
     }
 
     @Test
@@ -58,7 +21,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("1\r\n", outContent.toString());
+        assertEquals("1\r\n", outContent.toString());
     }
 
     @Test
@@ -72,7 +35,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("1\r\n2\r\n3\r\n10", outContent.toString().trim());
+        assertEquals("1\r\n2\r\n3\r\n10", outContent.toString().trim());
     }
 
     @Test
@@ -84,7 +47,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("1 2 3 10\r\n20", outContent.toString().trim());
+        assertEquals("1 2 3 10\r\n20", outContent.toString().trim());
     }
 
     @Test
@@ -95,7 +58,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("x\r\n", outContent.toString());
+        assertEquals("x\r\n", outContent.toString());
     }
 
     @Test
@@ -109,7 +72,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("x\r\nx x\r\nabcd\r\nabcd efgh", outContent.toString().trim());
+        assertEquals("x\r\nx x\r\nabcd\r\nabcd efgh", outContent.toString().trim());
     }
 
     @Test
@@ -121,7 +84,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("x x x abcd\r\nabcd efgh", outContent.toString().trim());
+        assertEquals("x x x abcd\r\nabcd efgh", outContent.toString().trim());
     }
 
     @Test
@@ -132,7 +95,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("x 1\r\n", outContent.toString());
+        assertEquals("x 1\r\n", outContent.toString());
     }
 
     @Test
@@ -146,7 +109,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("x 1\r\nx x 2\r\nabcd 10\r\nabcd efgh 20", outContent.toString().trim());
+        assertEquals("x 1\r\nx x 2\r\nabcd 10\r\nabcd efgh 20", outContent.toString().trim());
     }
 
     @Test
@@ -158,7 +121,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("x 1 x x 2 abcd 10\r\nabcd efgh 20", outContent.toString().trim());
+        assertEquals("x 1 x x 2 abcd 10\r\nabcd efgh 20", outContent.toString().trim());
     }
 
     @Test
@@ -171,7 +134,7 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("3\r\nfalse\r\ntrue\r\n", outContent.toString());
+        assertEquals("3\r\nfalse\r\ntrue\r\n", outContent.toString());
     }
 
     @Test
@@ -187,6 +150,6 @@ public class PrintTest {
                 "return 1;" +
                 "}";
         run(input);
-        Assert.assertEquals("0\r\n3\r\n6\r\ntrue", outContent.toString().trim());
+        assertEquals("0\r\n3\r\n6\r\ntrue", outContent.toString().trim());
     }
 }

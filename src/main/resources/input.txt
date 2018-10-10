@@ -1,6 +1,12 @@
 int main()
 {
-    print output(output2(output3(1)));
+    /*if(1> 2){
+    } else if(1>2) {
+    } else if(2 > 1){
+        print "else2";
+    }*/
+    int j = 2;
+    j /= 0;
     return 1;
 }
 int output(int i)

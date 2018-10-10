@@ -33,7 +33,7 @@ public class BlockContext implements ContextHandler<MyLangParser.BlockContext> {
         }
     }
 
-    public static <T> void update(String name, T newValue) throws MyLangException{
+    public static <T> T update(String name, T newValue) throws MyLangException{
         Variable var = localStorage
                 .stream()
                 .flatMap(Collection::stream)
@@ -45,20 +45,29 @@ public class BlockContext implements ContextHandler<MyLangParser.BlockContext> {
             throw new MyLangException("Переменная " + name + " не объявлена");
         }
         var.updateValue(newValue);
+        return newValue;
     }
 
-    private static void createNestedStorage(){
+    public static void createNestedStorage(){
         localStorage.addLast(new HashSet<>());
     }
 
-    private static void deleteNestedStorage() {
+    public static void deleteNestedStorage() {
         localStorage.removeLast();
     }
 
-    public static void pushStack(){
-        stack.addFirst(new LinkedList<Set<Variable>>(localStorage));
-        localStorage.clear();
+    public static void pushStack(LinkedList<FunArgs> names, List<MyLangParser.ExpressionContext> values) throws MyLangException{
         createNestedStorage();
+        for (int i = 0; i < values.size(); i++){
+            add(names.get(i).getName(), new ExpressionContext().handler(values.get(i)).getResponse());
+        }
+        Set<Variable> set = localStorage.getLast();
+        localStorage.removeLast();
+
+        stack.addFirst(new LinkedList<>(localStorage));
+        localStorage.clear();
+
+        localStorage.add(set);
     }
 
     public static void popStack(){
@@ -66,10 +75,9 @@ public class BlockContext implements ContextHandler<MyLangParser.BlockContext> {
         localStorage = stack.poll();
     }
 
-    public static void associateNamesWithValues(LinkedList<FunArgs> names, List<MyLangParser.ExpressionContext> values) throws MyLangException{
-        for (int i = 0; i < values.size(); i++){
-            add(names.get(i).getName(), new ExpressionContext().handler(values.get(i)).getResponse());
-        }
+    public static void clear(){
+        localStorage.clear();
+        stack.clear();
     }
 
     @Override

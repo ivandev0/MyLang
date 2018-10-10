@@ -1,105 +1,82 @@
-import myLang.interpreter.MyLangInterpreter;
-import myLangParser.MyLangLexer;
-import myLangParser.MyLangParser;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import myLang.response.MyLangException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-public class ExceptionsTest {
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    private final PrintStream originalOut = System.out;
-
-    private void run(String input, String errorMsg){
-        MyLangLexer lexer = new MyLangLexer(CharStreams.fromString(input));
-
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        MyLangParser parser = new MyLangParser(tokens);
-        try {
-            new MyLangInterpreter().visitCompilationUnit(parser.compilationUnit());
-            Assert.fail();
-        } catch (MyLangException e) {
-            //e.printStackTrace();
-            Assert.assertEquals(errorMsg, e.getMessage());
-        }
-    }
-
-    @Before
-    public void setUp() {
-        System.setOut(new PrintStream(outContent));
-    }
-
-    @After
-    public void tearDown() {
-        System.setOut(originalOut);
-    }
+public class ExceptionsTest extends TestBase{
 
     @Test
-    public void mainTest() {
+    public void mainTest1() {
         String input = "void main()" +
                 "{" +
                 "return 1;" +
                 "}";
-        run(input, "Первая функция должна быть main без аргументов, возвращающая int");
-
-        input = "int main(int i)" +
+        runWithException(input, "Первая функция должна быть main без аргументов, возвращающая int");
+    }
+    @Test
+    public void mainTest2() {
+        String input = "int main(int i)" +
                 "{" +
                 "return 1;" +
                 "}";
-        run(input, "Первая функция должна быть main без аргументов, возвращающая int");
-
-        input = "int main()" +
+        runWithException(input, "Первая функция должна быть main без аргументов, возвращающая int");
+    }
+    @Test
+    public void mainTest3() {
+        String input = "int main()" +
                 "{" +
                 "" +
                 "}";
-        run(input, "Функция main должна возвращать тип int");
-
-        input = "int main()" +
+        runWithException(input, "Функция main должна возвращать тип int");
+    }
+    @Test
+    public void mainTest4() {
+        String input = "int main()" +
                 "{" +
                 "return ;" +
                 "}";
-        run(input, "Функция main должна возвращать тип int");
+        runWithException(input, "Функция main должна возвращать тип int");
     }
 
     @Test
-    public void blockTest() {
+    public void blockTest1() {
         String input = "int main()" +
                 "{" +
                 "j = 0;" +
                 "return 1;" +
                 "}";
-        run(input, "Переменная j не объявлена");
+        runWithException(input, "Переменная j не объявлена");
+    }
 
-        input = "int main()" +
+    @Test
+    public void blockTest2() {
+        String input = "int main()" +
                 "{" +
                 "int j = 0;" +
                 "int j = 2;" +
                 "return 1;" +
                 "}";
-        run(input, "Переменная j уже существует");
-
-        input = "int main()" +
+        runWithException(input, "Переменная j уже существует");
+    }
+    @Test
+    public void blockTest3() {
+        String input = "int main()" +
                 "{" +
                 "int j = 2;" +
                 "j /= 0;" +
                 "return 1;" +
                 "}";
-        run(input, "Деление на 0");
-
-        input = "int main()" +
+        runWithException(input, "Деление на 0");
+    }
+    @Test
+    public void blockTest4() {
+        String input = "int main()" +
                 "{" +
                 "output(1);" +
                 "return 1;" +
                 "}";
-        run(input, "Функция output не объявлена");
-
-        input = "int main()" +
+        runWithException(input, "Функция output не объявлена");
+    }
+    @Test
+    public void blockTest5() {
+        String input = "int main()" +
                 "{" +
                 "output(1);" +
                 "return 1;" +
@@ -108,10 +85,12 @@ public class ExceptionsTest {
                 "{" +
                 "return ;" +
                 "}";
-        run(input, "Неверное количество параметров для функции output\n" +
+        runWithException(input, "Неверное количество параметров для функции output\n" +
                 "Ожидалось 2 аргументов");
-
-        input = "int main()" +
+    }
+    @Test
+    public void blockTest6() {
+        String input = "int main()" +
                 "{" +
                 "output(1);" +
                 "return 1;" +
@@ -120,9 +99,11 @@ public class ExceptionsTest {
                 "{" +
                 "return 1;" +
                 "}";
-        run(input, "Функция output должна возвращать значение типа void");
-
-        input = "int main()" +
+        runWithException(input, "Функция output должна возвращать значение типа void");
+    }
+    @Test
+    public void blockTest7() {
+        String input = "int main()" +
                 "{" +
                 "output(1);" +
                 "return 1;" +
@@ -131,9 +112,11 @@ public class ExceptionsTest {
                 "{" +
                 "return ;" +
                 "}";
-        run(input, "Функция output должна возвращать значение типа int");
-
-        input = "int main()" +
+        runWithException(input, "Функция output должна возвращать значение типа int");
+    }
+    @Test
+    public void blockTest8() {
+        String input = "int main()" +
                 "{" +
                 "output(1);" +
                 "return 1;" +
@@ -142,33 +125,39 @@ public class ExceptionsTest {
                 "{" +
                 "" +
                 "}";
-        run(input, "Функция output должна возвращать значение типа int");
+        runWithException(input, "Функция output должна возвращать значение типа int");
     }
 
     @Test
-    public void arithmeticTest() {
+    public void arithmeticTest1() {
         String input = "int main()" +
                 "{" +
                 "print 1 || 2;" +
                 "return 1;" +
                 "}";
-        run(input, "Оператор || не применим к типу int");
-
-        input = "int main()" +
+        runWithException(input, "Оператор || не применим к типу int");
+    }
+    @Test
+    public void arithmeticTest2() {
+        String input = "int main()" +
                 "{" +
                 "print 1 && 2;" +
                 "return 1;" +
                 "}";
-        run(input, "Оператор && не применим к типу int");
-
-        input = "int main()" +
+        runWithException(input, "Оператор && не применим к типу int");
+    }
+    @Test
+    public void arithmeticTest3() {
+        String input = "int main()" +
                 "{" +
                 "print output(1);" +
                 "return 1;" +
                 "}";
-        run(input, "Функция output не объявлена");
-
-        input = "int main()" +
+        runWithException(input, "Функция output не объявлена");
+    }
+    @Test
+    public void arithmeticTest4() {
+        String input = "int main()" +
                 "{" +
                 "print output(1);" +
                 "return 1;" +
@@ -178,6 +167,76 @@ public class ExceptionsTest {
                 "{" +
                 "" +
                 "}";
-        run(input, "Функция output не возвращает результата");
+        runWithException(input, "Функция output не возвращает результата");
+    }
+
+    @Test
+    public void visibilityTest1() {
+        String input = "int main(){" +
+                "int i = 4;" +
+                "fun(i);" +
+                "return 1;" +
+                "}" +
+                "void fun(int j) {" +
+                "print i;" +
+                "}";
+        runWithException(input, "Переменная i не объявлена");
+    }
+
+    @Test
+    public void visibilityTest2() {
+        String input = "int main(){" +
+                "int i = 4;" +
+                "fun(i);" +
+                "print a;" +
+                "return 1;" +
+                "}" +
+                "void fun(int j) {" +
+                "int a = 10;" +
+                "}";
+        runWithException(input, "Переменная a не объявлена");
+    }
+
+    @Test
+    public void visibilityTest3() {
+        String input = "int main(){" +
+                "int i = 4;" +
+                "fun(i);" +
+                "print c;" +
+                "return 1;" +
+                "}" +
+                "void fun(int j) {" +
+                "int a = 10;" +
+                "fun2(a);" +
+                "}" +
+                "void fun2(int b)" +
+                "{" +
+                "int c;" +
+                "}";
+        runWithException(input, "Переменная c не объявлена");
+    }
+
+    @Test
+    public void blockVisibilityTest1() {
+        String input = "int main(){" +
+                "for(int i = 0; i < 10; i+=1){" +
+                "}" +
+                "print i;" +
+                "return 1;"+
+                "}";
+        runWithException(input, "Переменная i не объявлена");
+    }
+
+    @Test
+    public void blockVisibilityTest2() {
+        String input = "int main(){" +
+                "int j = 9;" +
+                "if(j == 9){" +
+                "   int i = 10;" +
+                "}" +
+                "print i;" +
+                "return 1;"+
+                "}";
+        runWithException(input, "Переменная i не объявлена");
     }
 }

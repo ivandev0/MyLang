@@ -12,29 +12,24 @@ public class AssignmentContext implements ContextHandler<MyLangParser.Assignment
     public Response handler(MyLangParser.AssignmentContext ctx) throws MyLangException {
         String name = ctx.ID().getText();
         Integer num = (Integer) BlockContext.get(name).getValue();
-        IntegerResponse response = new AdditiveExpressionContext().handler(ctx.additiveExpression());
+        //IntegerResponse response = new AdditiveExpressionContext().handler(ctx.additiveExpression());
+        IntegerResponse response = (IntegerResponse) defaultHandler(ctx, 2);
         switch (ctx.assignmentOperator().start.getType()) {
             case MyLangLexer.ASSIGN:
-                BlockContext.update(name, response.getResponse());
-                break;
+                return new IntegerResponse(BlockContext.update(name, response.getResponse()));
             case MyLangLexer.ADD_ASSIGN:
-                BlockContext.update(name, response.getResponse() + num);
-                break;
+                return new IntegerResponse(BlockContext.update(name, num + response.getResponse()));
             case MyLangLexer.SUB_ASSIGN:
-                BlockContext.update(name,response.getResponse() - num);
-                break;
+                return new IntegerResponse(BlockContext.update(name,num - response.getResponse()));
             case MyLangLexer.MUL_ASSIGN:
-                BlockContext.update(name,response.getResponse() * num);
-                break;
+                return new IntegerResponse(BlockContext.update(name,num * response.getResponse()));
             case MyLangLexer.DIV_ASSIGN:
-                if(num == 0){
+                if(response.getResponse() == 0){
                     throw new MyLangException("Деление на 0");
                 }
-                BlockContext.update(name,response.getResponse() / num);
-                break;
+                return new IntegerResponse(BlockContext.update(name,num / response.getResponse()));
             default:
                 throw new MyLangException("Операция " + ctx.assignmentOperator().start.getText() + " не поддерживается");
         }
-        return new EmptyResponse();
     }
 }

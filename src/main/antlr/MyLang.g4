@@ -30,13 +30,13 @@ block
     ;
 
 blockStatements
-    : localVariableDeclarationStatement
+    : localVariableDeclarationStatement ';'
     | statement
     | print
     ;
 
 localVariableDeclarationStatement
-	: types variableDeclaratorList ';'
+	: types variableDeclaratorList
 	;
 
 variableDeclaratorList
@@ -49,12 +49,14 @@ variableDeclarator
 
 statement
     : block
-	| assignment
+	| assignment ';'
 	| ifThenStatement
 	| ifThenElseStatement
 	| forStatement
 	| funInvocation ';'
 	| returnStatement
+	| localVariableDeclarationStatement ';'
+	| print
 	;
 
 ifThenStatement
@@ -66,12 +68,8 @@ ifThenElseStatement
     ;
 
 forStatement
-    : 'for' '(' forInit? ';' expression? ';' forUpdate? ')' statement
+    : 'for' '(' localVariableDeclarationStatement? ';' expression? ';' forUpdate? ')' statement
     ;
-
-forInit
-	: types variableDeclaratorList
-	;
 
 forUpdate
 	: statementExpressionList
@@ -111,7 +109,8 @@ expression
 	;
 
 assignment
-	:	ID assignmentOperator additiveExpression ';'
+	: ID assignmentOperator additiveExpression
+	| ID assignmentOperator assignment
 	;
 
 assignmentOperator
@@ -166,7 +165,7 @@ NUMBER
     ;
 
 STRING
-    : '"' ~('"')* '"'
+    : '"' ~('\r' | '\n' | '"')* '"'
     ;
 
 // §3.11 Separators

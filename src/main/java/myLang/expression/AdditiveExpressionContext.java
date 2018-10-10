@@ -53,6 +53,9 @@ public class AdditiveExpressionContext implements ContextHandler<MyLangParser.Ad
                 case MyLangLexer.MUL:
                     return new IntegerResponse(firstResponse.getResponse() * secondResponse.getResponse());
                 case MyLangLexer.DIV:
+                    if(secondResponse.getResponse() == 0){
+                        throw new MyLangException("Деление на 0");
+                    }
                     return new IntegerResponse(firstResponse.getResponse() / secondResponse.getResponse());
             }
         }
