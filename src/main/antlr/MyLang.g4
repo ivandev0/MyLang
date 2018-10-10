@@ -101,7 +101,7 @@ returnStatement
     : 'return' expression? ';'
     ;
 
-//EXPRESSION
+// EXPRESSION
 
 expression
 	:	conditionalOrExpression
@@ -154,7 +154,7 @@ additiveExpression
     | ID
     ;
 
-//Lexer
+// Lexer
 
 ID
     : [a-zA-Z_][a-zA-Z_0-9]*
@@ -168,7 +168,7 @@ STRING
     : '"' ~('\r' | '\n' | '"')* '"'
     ;
 
-// §3.11 Separators
+// Separators
 
 LPAREN : '(';
 RPAREN : ')';
@@ -177,7 +177,7 @@ RBRACE : '}';
 SEMI : ';';
 COMMA : ',';
 
-// §3.12 Operators
+// Operators
 
 ASSIGN : '=';
 GT : '>';

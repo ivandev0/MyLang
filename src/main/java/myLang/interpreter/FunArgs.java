@@ -1,7 +1,10 @@
 package myLang.interpreter;
 
+/**
+ * Класс обертка, хранит в себе информация об аргументаъ метода.
+ */
 public class FunArgs{
-    final String type, name;
+    private final String type, name;
 
     FunArgs(String type, String name) {
         this.type = type;
@@ -16,11 +19,4 @@ public class FunArgs{
         return name;
     }
 
-    @Override
-    public String toString() {
-        return "myLang.interpreter.FunArgs{" +
-                "type='" + type + '\'' +
-                ", name='" + name + '\'' +
-                '}';
-    }
 }

@@ -36,6 +36,16 @@ public class ExceptionsTest extends TestBase{
     }
 
     @Test
+    public void mainTest5() {
+        String input = "int main()" +
+                "{" +
+                "main();" +
+                "return 1;" +
+                "}";
+        runWithException(input, "Нельзя вызывать рекурсивно функцию main");
+    }
+
+    @Test
     public void blockTest1() {
         String input = "int main()" +
                 "{" +
@@ -238,5 +248,27 @@ public class ExceptionsTest extends TestBase{
                 "return 1;"+
                 "}";
         runWithException(input, "Переменная i не объявлена");
+    }
+
+    @Test
+    public void intValidationTest1() {
+        String input = "int main()" +
+                "{" +
+                "   print 2147483647;" + //max int
+                "   print 2147483648;" +//max int + 1 -> exception
+                "    return 1;" +
+                "}";
+        runWithException(input, "For input string: \"2147483648\"");
+    }
+
+    @Test
+    public void intValidationTest2() {
+        String input = "int main()" +
+                "{" +
+                "   print -2147483648;" + //min int
+                "   print -2147483649;" +//min int - 1 -> exception
+                "    return 1;" +
+                "}";
+        runWithException(input, "For input string: \"-2147483649\"");
     }
 }

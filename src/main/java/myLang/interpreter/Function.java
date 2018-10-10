@@ -4,6 +4,15 @@ import myLangParser.MyLangParser;
 
 import java.util.LinkedList;
 
+/**
+ * Класс обертка, хранит информацию о функции:
+ * <ol>
+ *     <li>имя {@code name}</li>
+ *     <li>возвращаемое значение {@code resultType}</li>
+ *     <li>список аргументов {@code args}</li>
+ *     <li>ссылка на блок метода {@code ctx}</li>
+ * </ol>
+ */
 public class Function {
     final String name, resultType;
     final LinkedList<FunArgs> args;
@@ -32,12 +41,4 @@ public class Function {
         return ctx;
     }
 
-    @Override
-    public String toString() {
-        return "myLang.interpreter.Function{" +
-                "name='" + name + '\'' +
-                ", resultType='" + resultType + '\'' +
-                ", args=" + args +
-                '}';
-    }
 }

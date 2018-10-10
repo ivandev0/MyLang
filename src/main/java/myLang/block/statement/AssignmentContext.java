@@ -12,7 +12,6 @@ public class AssignmentContext implements ContextHandler<MyLangParser.Assignment
     public Response handler(MyLangParser.AssignmentContext ctx) throws MyLangException {
         String name = ctx.ID().getText();
         Integer num = (Integer) BlockContext.get(name).getValue();
-        //IntegerResponse response = new AdditiveExpressionContext().handler(ctx.additiveExpression());
         IntegerResponse response = (IntegerResponse) defaultHandler(ctx, 2);
         switch (ctx.assignmentOperator().start.getType()) {
             case MyLangLexer.ASSIGN:
