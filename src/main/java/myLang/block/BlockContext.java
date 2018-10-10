@@ -25,6 +25,8 @@ public class BlockContext implements ContextHandler<MyLangParser.BlockContext> {
 
     static private LinkedList<Set<Variable>> localStorage = new LinkedList<>();
     static private Deque<LinkedList<Set<Variable>>> stack = new LinkedList<>();
+    static private int stackCount = 0;
+    static private final int STACK_OVERFLOW = 100;
 
     /**
      * Возвращает значение переменной по имени, если она была объявлена.
@@ -107,6 +109,9 @@ public class BlockContext implements ContextHandler<MyLangParser.BlockContext> {
      * @throws MyLangException пробрасывается из внутреннего обработчика {@code handler}
      */
     public static void pushStack(LinkedList<FunArgs> names, List<MyLangParser.ExpressionContext> values) throws MyLangException{
+        if(++stackCount >= STACK_OVERFLOW){
+            throw new MyLangException("Произошло переполнение стека");
+        }
         createNestedStorage();
         for (int i = 0; i < values.size(); i++){
             add(names.get(i).getName(), new ExpressionContext().handler(values.get(i)).getResponse());
@@ -134,6 +139,7 @@ public class BlockContext implements ContextHandler<MyLangParser.BlockContext> {
     public static void clear(){
         localStorage.clear();
         stack.clear();
+        stackCount = 0;
     }
 
     /**

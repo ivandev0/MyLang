@@ -271,4 +271,17 @@ public class ExceptionsTest extends TestBase{
                 "}";
         runWithException(input, "For input string: \"-2147483649\"");
     }
+
+    @Test
+    public void stackOverflowTest() {
+        String input = "int main()" +
+                "{" +
+                "fun();" +
+                "return 1;" +
+                "}" +
+                "void fun(){" +
+                "   fun();" +
+                "}";
+        runWithException(input, "Произошло переполнение стека");
+    }
 }
