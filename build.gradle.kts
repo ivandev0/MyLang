@@ -21,6 +21,7 @@ configure<JavaPluginConvention> {
 }
 
 generateGrammarSource.apply {
+    outputDirectory = file("${project.buildDir}/generated-src/antlr/main/myLangParser")
     arguments.addAll(listOf("-Dlanguage=Java", "-visitor", "-package", "myLangParser","${project.projectDir}/src/main/antlr/MyLang.g4"))
 }
 

@@ -15,6 +15,9 @@ import java.io.PrintStream;
 public class TestBase {
     final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
+    static {
+        System.setProperty("line.separator","\r\n");
+    }
 
     void run(String input){
         MyLangLexer lexer = new MyLangLexer(CharStreams.fromString(input));

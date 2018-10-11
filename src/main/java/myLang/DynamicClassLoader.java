@@ -57,7 +57,7 @@ class DynamicClassLoader{
         if(files != null) {
             for (File file : files) {
                 if (file.isDirectory()) {
-                    String[] paths = file.getCanonicalPath().split("\\\\");
+                    String[] paths = file.getCanonicalPath().replace("\\", "/").split("/");
                     findClass(file, name, curPackage + "." + paths[paths.length - 1]);
                 } else {
                     if (file.getName().equals(name + ".class")) {
