@@ -1,9 +1,12 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 val generateGrammarSource: AntlrTask by tasks
 
 plugins {
     idea
     java
     antlr
+    kotlin("jvm") version "1.2.71"
 }
 
 repositories {
@@ -11,6 +14,7 @@ repositories {
 }
 
 dependencies {
+    compile(kotlin("stdlib-jdk8"))
     antlr( "org.antlr", "antlr4", "4.7.1")
     compile("org.antlr", "antlr4-runtime", "4.7.1")
     testCompile("junit", "junit", "4.12")
@@ -27,4 +31,8 @@ generateGrammarSource.apply {
 
 tasks.withType<JavaCompile> {
     dependsOn(generateGrammarSource)
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }
