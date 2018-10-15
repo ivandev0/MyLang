@@ -30,3 +30,5 @@ gradlew.bat
 build
 out
 /src/main/resources/input.txt
+
+*.iml
