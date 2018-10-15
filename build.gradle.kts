@@ -27,4 +27,5 @@ generateGrammarSource.apply {
 
 tasks.withType<JavaCompile> {
     dependsOn(generateGrammarSource)
+    options.encoding = "UTF-8"
 }
