@@ -1,23 +1,23 @@
 package myLangKotlin.expression
 
-import myLangKotlin.ContextHandler
 import myLangKotlin.response.BooleanResponse
 import myLangKotlin.response.IntegerResponse
 import myLangKotlin.response.MyLangException
 import myLangKotlin.response.Response
+import myLangParser.MyLangBaseVisitor
 import myLangParser.MyLangLexer
 import myLangParser.MyLangParser
 import org.antlr.v4.runtime.tree.TerminalNodeImpl
 
-class RelationalExpressionContext : ContextHandler<MyLangParser.RelationalExpressionContext> {
+class RelationalExpressionVisitor : MyLangBaseVisitor<Response<*>>() {
 
     @Throws(MyLangException::class)
-    override fun handler(ctx: MyLangParser.RelationalExpressionContext): Response<*> {
+    override fun visitRelationalExpression(ctx: MyLangParser.RelationalExpressionContext): Response<*> {
         if (ctx.childCount == 1) {
-            return defaultHandler(ctx)
+            return AdditiveExpressionVisitor().visitAdditiveExpression(ctx.additiveExpression())
         }
-        val firstResponse = defaultHandler(ctx, 0) as IntegerResponse
-        val secondResponse = defaultHandler(ctx, 2) as IntegerResponse
+        val firstResponse = visitRelationalExpression(ctx.relationalExpression()) as IntegerResponse
+        val secondResponse = AdditiveExpressionVisitor().visitAdditiveExpression(ctx.additiveExpression())
         when ((ctx.getChild(1) as TerminalNodeImpl).getSymbol().type) {
             MyLangLexer.LT -> return BooleanResponse(firstResponse.response < secondResponse.response)
             MyLangLexer.GT -> return BooleanResponse(firstResponse.response > secondResponse.response)

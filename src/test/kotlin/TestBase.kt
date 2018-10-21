@@ -1,5 +1,5 @@
-import myLangKotlin.block.BlockContext
-import myLangKotlin.interpreter.MyLangInterpreter
+import myLangKotlin.CompilationUnitVisitor
+import myLangKotlin.block.Storage
 import myLangKotlin.response.MyLangException
 import myLangParser.MyLangLexer
 import myLangParser.MyLangParser
@@ -22,7 +22,7 @@ open class TestBase {
         val tokens = CommonTokenStream(lexer)
         val parser = MyLangParser(tokens)
         try {
-            MyLangInterpreter().visitCompilationUnit(parser.compilationUnit())
+            CompilationUnitVisitor().visitCompilationUnit(parser.compilationUnit())
         } catch (e: MyLangException) {
             e.printStackTrace()
             Assert.fail()
@@ -36,9 +36,9 @@ open class TestBase {
         val tokens = CommonTokenStream(lexer)
         val parser = MyLangParser(tokens)
         try {
-            MyLangInterpreter().visitCompilationUnit(parser.compilationUnit())
+            CompilationUnitVisitor().visitCompilationUnit(parser.compilationUnit())
             Assert.fail()
-        } catch (e: MyLangException) {
+        } catch (e: Exception) {
             //e.printStackTrace();
             Assert.assertEquals(errorMsg, e.message)
         }
@@ -52,7 +52,7 @@ open class TestBase {
 
     @After
     fun tearDown() {
-        BlockContext.clear()
+        Storage.clear()
         System.setOut(originalOut)
     }
 

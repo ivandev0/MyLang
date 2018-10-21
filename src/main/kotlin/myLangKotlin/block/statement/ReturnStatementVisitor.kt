@@ -1,17 +1,17 @@
 package myLangKotlin.block.statement
 
-import myLangKotlin.ContextHandler
-import myLangKotlin.expression.ExpressionContext
+import myLangKotlin.expression.ExpressionVisitor
 import myLangKotlin.response.MyLangException
 import myLangKotlin.response.Response
 import myLangKotlin.response.ReturnResponse
+import myLangParser.MyLangBaseVisitor
 import myLangParser.MyLangParser
 
-class ReturnStatementContext : ContextHandler<MyLangParser.ReturnStatementContext> {
+class ReturnStatementVisitor : MyLangBaseVisitor<Response<*>>() {
     @Throws(MyLangException::class)
-    override fun handler(ctx: MyLangParser.ReturnStatementContext): Response<*> {
+    override fun visitReturnStatement(ctx: MyLangParser.ReturnStatementContext): Response<*> {
         if (ctx.expression() != null) {
-            val response = ExpressionContext().handler(ctx.expression())
+            val response = ExpressionVisitor().visitExpression(ctx.expression())
             return ReturnResponse(response.response.toString())
         }
         return ReturnResponse("")

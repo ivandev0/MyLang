@@ -1,56 +1,22 @@
 package myLangKotlin.block
 
-import myLangKotlin.ContextHandler
-import myLangKotlin.expression.ExpressionContext
-import myLangKotlin.interpreter.FunArgs
-import myLangKotlin.interpreter.Variable
-import myLangKotlin.response.EmptyResponse
+import myLangKotlin.expression.ExpressionVisitor
+import myLangKotlin.function.FunArgs
 import myLangKotlin.response.MyLangException
-import myLangKotlin.response.Response
-import myLangKotlin.response.ReturnResponse
 import myLangParser.MyLangParser
 
-import java.util.*
-
 /**
- * Данный класс расширяет интерфейс [ContextHandler]
- * и реализует основной обработчик всех блоков, заключенных в фигурные скобки { }.
+ * Класс для хранения всех переменных.
+ * Содержит списки блоков и необходим для переключения и восстановления контекста.
  *
  * В данном класе хранятся следующие статичные поля:
  *
- *  1.  `LinkedList<Set<Variable>> localStorage`
+ *  1. `LinkedList<Set<Variable>> localStorage`
  * Содержит список Set из Variable. Каждый Set представляет собой вложенный блок.
  *  2. `Deque<LinkedList<Set<Variable>>> stack`
- * Содержит списки блоков и необходим для переключения и восстановления контекста.
  *
  */
-class BlockContext : ContextHandler<MyLangParser.BlockContext> {
-
-    /**
-     * Основной блок обработчик блока метода. В цикле шаг за шагом вызывается каждая строка и обрабатывается.
-     * При встрече с оператором `return` цикл завершает работу и возврашает результат оператора return.
-     *
-     * @param ctx обрабатываемый лист.
-     * @return результат оператора return, если он был.
-     * @throws MyLangException пробрасывается из внутреннего обработчика `handler`
-     */
-    @Throws(MyLangException::class)
-    override fun handler(ctx: MyLangParser.BlockContext): Response<*> {
-        var response: Response<*> = EmptyResponse()
-        if (ctx.blockStatements() != null) {
-            createNestedStorage()
-            for (blockStatement in ctx.blockStatements()) {
-                response = BlockStatementsContext().handler(blockStatement)
-                if (response is ReturnResponse) {
-                    break
-                }
-            }
-            deleteNestedStorage()
-        }
-
-        return response
-    }
-
+class Storage{
     companion object {
 
         var localStorage : MutableList<MutableSet<Variable<Any?>>> = mutableListOf()
@@ -141,7 +107,7 @@ class BlockContext : ContextHandler<MyLangParser.BlockContext> {
             }
             createNestedStorage()
             for (i in values.indices) {
-                add(names[i].name, ExpressionContext().handler(values[i]).response)
+                add(names[i].name, ExpressionVisitor().visitExpression(values[i]).response)
             }
             val set = localStorage.last()
             localStorage.removeAt(localStorage.lastIndex)
@@ -171,13 +137,3 @@ class BlockContext : ContextHandler<MyLangParser.BlockContext> {
         }
     }
 }
-
-internal class BlockStatementsContext : ContextHandler<MyLangParser.BlockStatementsContext> {
-
-    @Throws(MyLangException::class)
-    override fun handler(ctx: MyLangParser.BlockStatementsContext): Response<*> {
-        return defaultHandler(ctx)
-    }
-
-}
-

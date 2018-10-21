@@ -1,4 +1,4 @@
-package myLangKotlin.interpreter
+package myLangKotlin.block
 
 import myLangKotlin.response.MyLangException
 

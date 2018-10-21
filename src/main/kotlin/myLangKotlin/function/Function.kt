@@ -1,4 +1,4 @@
-package myLangKotlin.interpreter
+package myLangKotlin.function
 
 import myLangParser.MyLangParser
 
@@ -12,3 +12,9 @@ import myLangParser.MyLangParser
  *
  */
 class Function internal constructor(val name: String, val resultType: String, val args: List<FunArgs>, val ctx: MyLangParser.FunDeclarationContext)
+
+
+/**
+ * Класс обертка, хранит в себе информация об аргументаъ метода.
+ */
+class FunArgs internal constructor(val type: String, val name: String)

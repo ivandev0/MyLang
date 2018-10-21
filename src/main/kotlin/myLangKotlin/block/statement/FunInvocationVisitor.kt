@@ -1,20 +1,21 @@
 package myLangKotlin.block.statement
 
-import myLangKotlin.ContextHandler
-import myLangKotlin.interpreter.MyLangInterpreter
+import myLangKotlin.CompilationUnitVisitor
+import myLangKotlin.block.BlockVisitor
+import myLangKotlin.block.Storage
 import myLangKotlin.response.EmptyResponse
 import myLangKotlin.response.MyLangException
 import myLangKotlin.response.Response
-import myLangKotlin.block.BlockContext
+import myLangParser.MyLangBaseVisitor
 import myLangParser.MyLangParser
 
 import java.util.LinkedList
 
-class FunInvocationContext : ContextHandler<MyLangParser.FunInvocationContext> {
+class FunInvocationVisitor : MyLangBaseVisitor<Response<*>>() {
     @Throws(MyLangException::class)
-    override fun handler(ctx: MyLangParser.FunInvocationContext): Response<*> {
+    override fun visitFunInvocation(ctx: MyLangParser.FunInvocationContext): Response<*> {
         val name = ctx.ID().text
-        val function = MyLangInterpreter.functions
+        val function = CompilationUnitVisitor.functions
                 .stream()
                 .filter { func -> func.name == name }
                 .findFirst()
@@ -30,16 +31,16 @@ class FunInvocationContext : ContextHandler<MyLangParser.FunInvocationContext> {
                     + "\nОжидалось " + function.args.size + " аргументов")
         }
 
-        BlockContext.pushStack(function.args, funArgs)
+        Storage.pushStack(function.args, funArgs)
         val fdc = function.ctx
-        val response = BlockContext().handler(fdc.block())
+        val response = BlockVisitor().visitBlock(fdc.block())
         if (response.response == null && function.resultType != "void") {
             throw MyLangException("Функция " + name + " должна возвращать значение типа " + function.resultType)
         }
         if (response.response != null && (response.response == "" && function.resultType != "void" || response.response != "" && function.resultType == "void")) {
             throw MyLangException("Функция " + name + " должна возвращать значение типа " + function.resultType)
         }
-        BlockContext.popStack()
+        Storage.popStack()
 
         return if (response !is EmptyResponse && response.response == "") {
             EmptyResponse()

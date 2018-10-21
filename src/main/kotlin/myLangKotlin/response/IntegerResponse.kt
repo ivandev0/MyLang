@@ -1,10 +1,6 @@
 package myLangKotlin.response
 
 /**
- * Реализация [AbstractResponse] для возвращения целочисленного значения.
+ * Реализация [Response] для возвращения целочисленного значения.
  */
-class IntegerResponse(response: Int) : AbstractResponse<Int>(response) {
-
-    override val response: Int
-        get() = super.response
-}
+class IntegerResponse(override var response: Int) : Response<Int>

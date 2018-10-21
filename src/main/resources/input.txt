@@ -1,21 +1,14 @@
-int main()
-{
-    print "x": 1, "er": 2;
+int main(){
+    int i = 4;
+    fun(i);
+    print 1;
     return 1;
 }
-void fun(){
-    print 1;
-    fun();
+void fun(int j) {
+    int a = 10;
+    fun2(a);
 }
-int output(int i)
+void fun2(int b)
 {
-    return i + 1;
-}
-int output2(int i)
-{
-    return i + 1;
-}
-void output3(int i)
-{
-    return ;
+    int c;
 }

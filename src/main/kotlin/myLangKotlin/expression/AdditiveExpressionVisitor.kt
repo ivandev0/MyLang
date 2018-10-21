@@ -1,31 +1,33 @@
 package myLangKotlin.expression
 
-import myLangKotlin.ContextHandler
-import myLangKotlin.block.BlockContext
-import myLangKotlin.block.statement.FunInvocationContext
-import myLangKotlin.interpreter.MyLangInterpreter
+import myLangKotlin.CompilationUnitVisitor
+import myLangKotlin.block.Storage
+import myLangKotlin.block.statement.FunInvocationVisitor
 import myLangKotlin.response.IntegerResponse
 import myLangKotlin.response.MyLangException
+import myLangKotlin.response.Response
+import myLangParser.MyLangBaseVisitor
 import myLangParser.MyLangLexer
 import myLangParser.MyLangParser
 import org.antlr.v4.runtime.tree.TerminalNodeImpl
 
-class AdditiveExpressionContext : ContextHandler<MyLangParser.AdditiveExpressionContext> {
+class AdditiveExpressionVisitor : MyLangBaseVisitor<Response<*>>() {
 
     @Throws(MyLangException::class)
-    override fun handler(ctx: MyLangParser.AdditiveExpressionContext): IntegerResponse {
+    override fun visitAdditiveExpression(ctx: MyLangParser.AdditiveExpressionContext): IntegerResponse {
+
         if (ctx.NUMBER() != null) {
             return IntegerResponse(Integer.valueOf(ctx.NUMBER().text))
         }
 
         if (ctx.ID() != null) {
-            val result = BlockContext[ctx.ID().text].value as Int
+            val result = Storage[ctx.ID().text].value as Int
             return IntegerResponse(result)
         }
 
         if (ctx.funInvocation() != null) {
             val name = ctx.funInvocation().ID().text
-            val function = MyLangInterpreter.functions
+            val function = CompilationUnitVisitor.functions
                     .stream()
                     .filter { `fun` -> `fun`.name == name }
                     .findFirst()
@@ -33,14 +35,14 @@ class AdditiveExpressionContext : ContextHandler<MyLangParser.AdditiveExpression
             if (function.resultType == "void") {
                 throw MyLangException("Функция $name не возвращает результата")
             }
-            return IntegerResponse(Integer.valueOf(FunInvocationContext().handler(ctx.funInvocation()).response as String))
+            return IntegerResponse(Integer.valueOf(FunInvocationVisitor().visitFunInvocation(ctx.funInvocation()).response as String))
         }
 
         if (ctx.LPAREN() != null && ctx.RPAREN() != null) {
-            return handler(ctx.additiveExpression(0))
+            return visitAdditiveExpression(ctx.additiveExpression(0))
         } else {
-            val firstResponse = handler(ctx.additiveExpression(0))
-            val secondResponse = handler(ctx.additiveExpression(1))
+            val firstResponse = visitAdditiveExpression(ctx.additiveExpression(0))
+            val secondResponse = visitAdditiveExpression(ctx.additiveExpression(1))
             when ((ctx.getChild(1) as TerminalNodeImpl).getSymbol().type) {
                 MyLangLexer.ADD -> return IntegerResponse(firstResponse.response + secondResponse.response)
                 MyLangLexer.SUB -> return IntegerResponse(firstResponse.response - secondResponse.response)

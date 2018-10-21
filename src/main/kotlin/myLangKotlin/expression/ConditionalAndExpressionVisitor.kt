@@ -1,21 +1,21 @@
 package myLangKotlin.expression
 
-import myLangKotlin.ContextHandler
 import myLangKotlin.response.BooleanResponse
 import myLangKotlin.response.IntegerResponse
 import myLangKotlin.response.MyLangException
 import myLangKotlin.response.Response
+import myLangParser.MyLangBaseVisitor
 import myLangParser.MyLangParser
 
-class ConditionalAndExpressionContext : ContextHandler<MyLangParser.ConditionalAndExpressionContext> {
+class ConditionalAndExpressionVisitor : MyLangBaseVisitor<Response<*>>() {
 
     @Throws(MyLangException::class)
-    override fun handler(ctx: MyLangParser.ConditionalAndExpressionContext): Response<*> {
+    override fun visitConditionalAndExpression(ctx: MyLangParser.ConditionalAndExpressionContext): Response<*> {
         if (ctx.childCount == 1) {
-            return defaultHandler(ctx)
+            return EqualityExpressionVisitor().visitEqualityExpression(ctx.equalityExpression())
         }
-        val firstResponse = defaultHandler(ctx, 0)
-        val secondResponse = defaultHandler(ctx, 2)
+        val firstResponse = visitConditionalAndExpression(ctx.conditionalAndExpression())
+        val secondResponse = EqualityExpressionVisitor().visitEqualityExpression(ctx.equalityExpression())
         if (firstResponse is IntegerResponse || secondResponse is IntegerResponse) {
             throw MyLangException("Оператор && не применим к типу int")
         }
